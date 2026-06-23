@@ -342,7 +342,8 @@ h1 em {
   border-color: var(--navy);
   box-shadow: 0 0 0 1px var(--navy), 0 8px 32px rgba(13,27,42,0.15);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  margin-top: 0;
 }
 .plan.featured::before {
   content: '';
@@ -353,16 +354,19 @@ h1 em {
 }
 .plan-badge {
   position: absolute;
-  top: -12px;
-  left: 32px;
-  background: var(--navy);
-  color: var(--gold);
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--navy);
   font-size: 10px;
   font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 3px;
+  padding: 5px 16px;
+  border-radius: 20px;
   letter-spacing: 1px;
   text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 10;
 }
 .plan-name {
   font-size: 11px;
