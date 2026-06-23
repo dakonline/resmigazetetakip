@@ -646,7 +646,7 @@ footer p { font-size:13px; color:#444; }
     <div id="step1">
       <div class="step-indicator"><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
       <h2>Alarmı Kur</h2>
-      <p class="modal-sub">7 gün ücretsiz — kredi kartı gerekmez.</p>
+      <p class="modal-sub"> — kredi kartı gerekmez.</p>
       <div class="form-group">
         <label>E-posta adresi</label>
         <input type="email" id="email" placeholder="sen@example.com">
@@ -662,7 +662,7 @@ footer p { font-size:13px; color:#444; }
     <div id="step2" style="display:none">
       <div class="step-indicator"><div class="step-dot active"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
       <h2>Plan Seç</h2>
-      <p class="modal-sub">7 gün ücretsiz deneme — her iki planda da.</p>
+      <p class="modal-sub"> deneme — her iki planda da.</p>
       <div id="planBireysel" class="plan-box" onclick="selectPlan('bireysel')" style="border:1.5px solid var(--border-light);border-radius:12px;padding:18px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-weight:600;font-size:14px;">🧍 Bireysel</span>
@@ -683,13 +683,13 @@ footer p { font-size:13px; color:#444; }
     <div id="step3" style="display:none">
       <div class="step-indicator"><div class="step-dot active"></div><div class="step-dot active"></div><div class="step-dot active"></div></div>
       <h2>Ön Kayıt</h2>
-      <p class="modal-sub" id="payment-summary">7 gün ücretsiz deneme başlar.</p>
+      <p class="modal-sub" id="payment-summary"> deneme başlar.</p>
       <div style="background:var(--off-white);border-radius:10px;padding:18px;margin-bottom:20px;font-size:14px;line-height:1.7;color:var(--gray);">
         📋 <strong style="color:var(--dark)">Nasıl çalışır?</strong><br>
         Formu doldurun → 24 saat içinde Telegram bot linki gelsin → Bağlayın → Takip başlasın.
       </div>
       <button class="submit-btn" id="registerBtn" onclick="submitPreRegistration()">Ön Kayıt Yap →</button>
-      <p class="form-note">Şimdi ödeme gerekmez · 7 gün ücretsiz</p>
+      <p class="form-note">Şimdi ödeme gerekmez · </p>
       <button style="width:100%;padding:10px;background:none;border:none;color:var(--gray);cursor:pointer;margin-top:8px;font-size:13px;" onclick="showStep('step2')">← Geri</button>
     </div>
     <div id="stepSuccess" style="display:none">
@@ -767,7 +767,7 @@ function selectPlan(plan) {
     bi.style.borderColor = 'var(--border-light)'; bi.style.background = 'white';
   }
   document.getElementById('payment-summary').textContent =
-    plan === 'pro' ? 'Pro Plan · ₺349/ay · 7 gün ücretsiz' : 'Bireysel Plan · ₺149/ay · 7 gün ücretsiz';
+    plan === 'pro' ? 'Pro Plan · ₺349/ay · ' : 'Bireysel Plan · ₺149/ay · ';
 }
 function goStep2() {
   const email = document.getElementById('email').value.trim();
