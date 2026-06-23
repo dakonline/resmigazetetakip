@@ -32,7 +32,10 @@ body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--
 
 /* NAV */
 nav {
-  background: var(--navy);
+  background: rgba(13,27,42,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   padding: 0 60px;
   display: flex;
   justify-content: space-between;
@@ -95,7 +98,7 @@ nav {
 
 /* HERO */
 .hero {
-  background: var(--navy);
+  background: linear-gradient(135deg, #070d1a 0%, #0d1b2a 50%, #0a1628 100%);
   padding: 100px 60px 80px;
   position: relative;
   overflow: hidden;
@@ -103,10 +106,15 @@ nav {
 .hero::before {
   content: '';
   position: absolute;
-  top: 0; right: 0;
-  width: 600px; height: 100%;
-  background: linear-gradient(135deg, transparent 0%, rgba(26,92,138,0.15) 100%);
+  top: -200px; right: -100px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(26,92,138,0.25) 0%, rgba(100,50,200,0.08) 50%, transparent 70%);
   pointer-events: none;
+  animation: heroGlow 6s ease-in-out infinite alternate;
+}
+@keyframes heroGlow {
+  0% { transform: scale(1) translate(0,0); opacity: 0.6; }
+  100% { transform: scale(1.2) translate(-30px, 30px); opacity: 1; }
 }
 .hero::after {
   content: '';
@@ -226,6 +234,11 @@ h1 em {
   padding: 40px 36px;
   position: relative;
   border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.step-card:hover {
+  box-shadow: 0 8px 32px rgba(26,92,138,0.1);
+  border-color: rgba(26,92,138,0.2);
 }
 .step-card:first-child { border-radius: 8px 0 0 8px; }
 .step-card:last-child { border-radius: 0 8px 8px 0; }
@@ -275,11 +288,30 @@ h1 em {
 .who-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
 .who-card {
   background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.08);
   padding: 36px;
-  transition: background 0.2s;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
 }
-.who-card:hover { background: rgba(255,255,255,0.07); }
+.who-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201,168,76,0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.who-card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(201,168,76,0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(201,168,76,0.1);
+}
+.who-card:hover::before { opacity: 1; }
 .who-icon { font-size: 32px; margin-bottom: 20px; }
 .who-title { font-size: 16px; font-weight: 600; color: white; margin-bottom: 10px; }
 .who-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; }
@@ -308,7 +340,16 @@ h1 em {
 }
 .plan.featured {
   border-color: var(--navy);
-  box-shadow: 0 0 0 1px var(--navy);
+  box-shadow: 0 0 0 1px var(--navy), 0 8px 32px rgba(13,27,42,0.15);
+  position: relative;
+  overflow: hidden;
+}
+.plan.featured::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--gold), var(--gold-light), var(--gold));
 }
 .plan-badge {
   position: absolute;
