@@ -900,9 +900,26 @@ setTimeout(type, 1000);
         <input type="email" id="email" placeholder="ornek@email.com">
       </div>
       <div class="form-group">
+        <label>Hazır Paket Seçin (İsteğe Bağlı)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div onclick="selectPackage(this,'vergi, SGK, asgari ücret')" style="border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;font-size:12px;transition:all .15s;" class="pkg-btn">
+            🧾 <strong>SMMM Paketi</strong><br><span style="color:var(--muted);font-size:11px;">vergi, SGK, asgari ücret</span>
+          </div>
+          <div onclick="selectPackage(this,'gümrük, ithalat, tarife')" style="border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;font-size:12px;transition:all .15s;" class="pkg-btn">
+            🚢 <strong>İthalat Paketi</strong><br><span style="color:var(--muted);font-size:11px;">gümrük, ithalat, tarife</span>
+          </div>
+          <div onclick="selectPackage(this,'imar, tapu, kentsel dönüşüm')" style="border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;font-size:12px;transition:all .15s;" class="pkg-btn">
+            🏗️ <strong>İnşaat Paketi</strong><br><span style="color:var(--muted);font-size:11px;">imar, tapu, kentsel dönüşüm</span>
+          </div>
+          <div onclick="selectPackage(this,'iş kanunu, kıdem, ihbar')" style="border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;font-size:12px;transition:all .15s;" class="pkg-btn">
+            👔 <strong>İK Paketi</strong><br><span style="color:var(--muted);font-size:11px;">iş kanunu, kıdem, ihbar</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
         <label>Anahtar Kelimeler</label>
         <textarea id="keywords" placeholder="SGK, vergi, gümrük"></textarea>
-        <div class="form-hint">Virgülle ayırın. Bireysel planda en fazla 3 kelime.</div>
+        <div class="form-hint">Virgülle ayırın veya yukarıdan hazır paket seçin.</div>
       </div>
       <button class="submit-btn" onclick="goStep2()">Devam Et →</button>
       <p class="form-note">KVKK uyumlu · Verileriniz güvende</p>
@@ -963,6 +980,16 @@ const sb = createClient(
 const SHOPIER = { bireysel: 'https://www.shopier.com/48362894', pro: 'https://www.shopier.com/48363343' };
 let userData = { plan: 'pro' };
 
+function selectPackage(el, keywords) {
+  document.querySelectorAll('.pkg-btn').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.background = 'white';
+  });
+  el.style.borderColor = 'var(--navy)';
+  el.style.background = 'var(--off)';
+  const kw = document.getElementById('keywords');
+  kw.value = keywords;
+}
 function toggleFaq(btn) {
   const item = btn.parentElement;
   const isOpen = item.classList.contains('open');
