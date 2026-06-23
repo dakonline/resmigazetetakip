@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResmiGazeteTakip — Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; min-height: 100vh; }
+
+/* LOGIN */
+.login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.login-box { background: #111; border: 1px solid #222; border-radius: 16px; padding: 40px; width: 360px; }
+.login-box h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.login-box p { font-size: 13px; color: #555; margin-bottom: 28px; }
+.login-box input { width: 100%; padding: 11px 14px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; font-size: 14px; color: #e5e5e5; font-family: 'Inter', sans-serif; margin-bottom: 12px; outline: none; }
+.login-box input:focus { border-color: #444; }
+.login-btn { width: 100%; padding: 12px; background: #1a5c8a; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.login-btn:hover { background: #134870; }
+.login-error { color: #ff6b5b; font-size: 12px; margin-top: 8px; display: none; }
+
+/* LAYOUT */
+.app { display: none; }
+.sidebar { width: 220px; background: #111; border-right: 1px solid #1a1a1a; min-height: 100vh; position: fixed; top: 0; left: 0; padding: 24px 16px; }
+.sidebar-logo { font-size: 15px; font-weight: 600; color: #1a8a5c; margin-bottom: 32px; padding: 0 8px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: #666; cursor: pointer; margin-bottom: 4px; transition: all .15s; }
+.nav-item:hover { background: #1a1a1a; color: #e5e5e5; }
+.nav-item.active { background: #1a1a1a; color: #e5e5e5; }
+.nav-icon { font-size: 15px; }
+.main { margin-left: 220px; padding: 32px; }
+.page { display: none; }
+.page.active { display: block; }
+.page-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.page-sub { font-size: 13px; color: #555; margin-bottom: 28px; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.stat { background: #111; border: 1px solid #1a1a1a; border-radius: 12px; padding: 20px; }
+.stat-val { font-size: 28px; font-weight: 600; color: #e5e5e5; font-family: 'JetBrains Mono', monospace; }
+.stat-lbl { font-size: 12px; color: #555; margin-top: 4px; }
+.stat.green .stat-val { color: #2d9e5f; }
+.stat.blue .stat-val { color: #1a5c8a; }
+.stat.amber .stat-val { color: #ba7517; }
+
+/* TABLE */
+.table-wrap { background: #111; border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden; }
+.table-header { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; }
+.table-header h3 { font-size: 14px; font-weight: 500; }
+.search-input { padding: 7px 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 7px; font-size: 13px; color: #e5e5e5; font-family: 'Inter', sans-serif; outline: none; width: 200px; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 500; color: #555; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #1a1a1a; }
+td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #111; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #141414; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; }
+.badge.active { background: #0d2e1a; color: #2d9e5f; }
+.badge.pending { background: #2a1f0a; color: #ba7517; }
+.badge.cancelled { background: #1f0d0d; color: #ff6b5b; }
+.badge.free { background: #1a1a1a; color: #666; }
+.badge.pro { background: #0d1e2e; color: #1a5c8a; }
+.kw-list { display: flex; gap: 4px; flex-wrap: wrap; }
+.kw { font-size: 11px; background: #1a1a1a; color: #888; padding: 2px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
+.action-btn { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+.btn-activate { background: #0d2e1a; color: #2d9e5f; }
+.btn-activate:hover { background: #1a4a2a; }
+.btn-cancel { background: #1f0d0d; color: #ff6b5b; }
+.btn-cancel:hover { background: #2e1414; }
+.btn-msg { background: #1a1a2e; color: #5b8aff; }
+.btn-msg:hover { background: #1a1a3a; }
+
+/* ENTRIES */
+.entry-row td:first-child { font-size: 12px; color: #888; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+.entry-title { font-size: 13px; color: #e5e5e5; }
+.entry-cat { font-size: 11px; color: #555; margin-top: 2px; }
+
+/* MESAJ */
+.msg-form { background: #111; border: 1px solid #1a1a1a; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+.msg-form h3 { font-size: 14px; font-weight: 500; margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; color: #555; margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 7px; font-size: 13px; color: #e5e5e5; font-family: 'Inter', sans-serif; outline: none; }
+.form-group textarea { height: 100px; resize: vertical; }
+.send-btn { padding: 11px 24px; background: #1a5c8a; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.send-btn:hover { background: #134870; }
+.send-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* LOADING */
+.loading { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.2); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a2e1a; border: 1px solid #2d9e5f; color: #2d9e5f; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; opacity: 0; transform: translateY(10px); transition: all .3s; z-index: 1000; }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { background: #2e1a1a; border-color: #ff6b5b; color: #ff6b5b; }
+
+.empty { padding: 40px; text-align: center; color: #444; font-size: 13px; }
+.refresh-btn { padding: 7px 14px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 7px; font-size: 12px; color: #888; cursor: pointer; font-family: 'Inter', sans-serif; }
+.refresh-btn:hover { background: #222; color: #e5e5e5; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <h1>🔐 Admin Girişi</h1>
+    <p>ResmiGazeteTakip yönetim paneli</p>
+    <input type="password" id="adminPass" placeholder="Şifre" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">Giriş Yap</button>
+    <p class="login-error" id="loginError">Hatalı şifre.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">📋 RG Admin</div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('users')"><span class="nav-icon">👥</span> Kullanıcılar</div>
+    <div class="nav-item" onclick="showPage('entries')"><span class="nav-icon">📰</span> RG Kayıtları</div>
+    <div class="nav-item" onclick="showPage('message')"><span class="nav-icon">✉️</span> Mesaj Gönder</div>
+    <div style="position:absolute;bottom:24px;left:16px;right:16px;">
+      <div class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span> Çıkış</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" id="lastCheck">Son kontrol: yükleniyor...</div>
+      <div class="stats-grid">
+        <div class="stat green"><div class="stat-val" id="statActive">—</div><div class="stat-lbl">Aktif kullanıcı</div></div>
+        <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Toplam kayıt</div></div>
+        <div class="stat amber"><div class="stat-val" id="statPending">—</div><div class="stat-lbl">Ödeme bekleyen</div></div>
+        <div class="stat blue"><div class="stat-val" id="statEntries">—</div><div class="stat-lbl">RG kaydı</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><h3>Son kayıtlar</h3><button class="refresh-btn" onclick="loadDashboard()">↻ Yenile</button></div>
+        <table>
+          <thead><tr><th>E-posta</th><th>Kelimeler</th><th>Plan</th><th>Durum</th><th>Tarih</th></tr></thead>
+          <tbody id="recentUsers"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- KULLANICILAR -->
+    <div class="page" id="page-users">
+      <div class="page-title">Kullanıcılar</div>
+      <div class="page-sub">Tüm kayıtlı kullanıcılar</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3 id="userCount">Yükleniyor...</h3>
+          <div style="display:flex;gap:8px;">
+            <input class="search-input" placeholder="E-posta ara..." oninput="filterUsers(this.value)">
+            <button class="refresh-btn" onclick="loadUsers()">↻ Yenile</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>E-posta</th><th>Telegram ID</th><th>Kelimeler</th><th>Plan</th><th>Durum</th><th>Tarih</th><th>İşlem</th></tr></thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ENTRIES -->
+    <div class="page" id="page-entries">
+      <div class="page-title">Resmi Gazete Kayıtları</div>
+      <div class="page-sub">Sistemde kayıtlı RG başlıkları</div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3 id="entryCount">Yükleniyor...</h3>
+          <button class="refresh-btn" onclick="loadEntries()">↻ Yenile</button>
+        </div>
+        <table>
+          <thead><tr><th>Tarih</th><th>Başlık</th><th>Kategori</th></tr></thead>
+          <tbody id="entriesTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MESAJ -->
+    <div class="page" id="page-message">
+      <div class="page-title">Mesaj Gönder</div>
+      <div class="page-sub">Telegram üzerinden kullanıcılara mesaj gönder</div>
+      <div class="msg-form">
+        <h3>Toplu Mesaj</h3>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Hedef</label>
+          <select id="msgTarget">
+            <option value="all">Tüm aktif kullanıcılar</option>
+            <option value="single">Tek kullanıcı (Telegram ID)</option>
+          </select>
+        </div>
+        <div class="form-group" id="singleTarget" style="margin-bottom:12px;display:none;">
+          <label>Telegram Chat ID</label>
+          <input type="text" id="msgChatId" placeholder="6585975972">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Mesaj</label>
+          <textarea id="msgText" placeholder="📢 Duyuru: ..."></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">Gönder →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://glpbeotrmvjlwmrfhsud.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdscGJlb3RybXZqbHdtcmZoc3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjMzNjMsImV4cCI6MjA5NzUzOTM2M30.gbEwKKViCXrJi6kXKoMtbidHzBYiJhcZq_G2DXMqd8M'
+);
+
+const RG_TOKEN = '8881222913:AAGGpornT8bXwOb0jOLUj1T3MF0WVFpaEOY';
+const ADMIN_PASS = 'rg2026admin';
+
+let allUsers = [];
+
+function login() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass === ADMIN_PASS) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    loadDashboard();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function logout() {
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('adminPass').value = '';
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'users') loadUsers();
+  if (id === 'entries') loadEntries();
+}
+
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (error ? ' error' : '');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function fmt(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+async function loadDashboard() {
+  try {
+    const { data: users } = await sb.from('rg_users').select('*').order('created_at', { ascending: false });
+    const { data: entries } = await sb.from('rg_entries').select('id', { count: 'exact' });
+    const active = users?.filter(u => u.status === 'active').length || 0;
+    const pending = users?.filter(u => u.status === 'pending').length || 0;
+    document.getElementById('statActive').textContent = active;
+    document.getElementById('statTotal').textContent = users?.length || 0;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statEntries').textContent = entries?.length || 0;
+    document.getElementById('lastCheck').textContent = 'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
+    const tbody = document.getElementById('recentUsers');
+    const recent = (users || []).slice(0, 10);
+    tbody.innerHTML = recent.length ? recent.map(u => `
+      <tr>
+        <td>${u.email || '—'}</td>
+        <td><div class="kw-list">${(u.keywords||[]).slice(0,3).map(k=>`<span class="kw">${k}</span>`).join('')}${u.keywords?.length>3?`<span class="kw">+${u.keywords.length-3}</span>`:''}</div></td>
+        <td><span class="badge ${u.plan||'free'}">${u.plan||'free'}</span></td>
+        <td><span class="badge ${u.status||'pending'}">${u.status||'pending'}</span></td>
+        <td>${fmt(u.created_at)}</td>
+      </tr>`).join('') : '<tr><td colspan="5" class="empty">Henüz kayıt yok</td></tr>';
+  } catch(e) { showToast('Veri yüklenemedi', true); }
+}
+
+async function loadUsers() {
+  try {
+    const { data } = await sb.from('rg_users').select('*').order('created_at', { ascending: false });
+    allUsers = data || [];
+    renderUsers(allUsers);
+    document.getElementById('userCount').textContent = `${allUsers.length} kullanıcı`;
+  } catch(e) { showToast('Kullanıcılar yüklenemedi', true); }
+}
+
+function filterUsers(q) {
+  const filtered = allUsers.filter(u => (u.email||'').toLowerCase().includes(q.toLowerCase()));
+  renderUsers(filtered);
+}
+
+function renderUsers(users) {
+  const tbody = document.getElementById('usersTable');
+  tbody.innerHTML = users.length ? users.map(u => `
+    <tr>
+      <td>${u.email || '—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#555;">${u.telegram_chat_id || '—'}</td>
+      <td><div class="kw-list">${(u.keywords||[]).map(k=>`<span class="kw">${k}</span>`).join('')}</div></td>
+      <td><span class="badge ${u.plan||'free'}">${u.plan||'free'}</span></td>
+      <td><span class="badge ${u.status||'pending'}">${u.status||'pending'}</span></td>
+      <td>${fmt(u.created_at)}</td>
+      <td style="display:flex;gap:4px;">
+        ${u.status !== 'active' ? `<button class="action-btn btn-activate" onclick="updateStatus('${u.id}','active')">Aktif Et</button>` : ''}
+        ${u.status !== 'cancelled' ? `<button class="action-btn btn-cancel" onclick="updateStatus('${u.id}','cancelled')">İptal</button>` : ''}
+        ${u.telegram_chat_id ? `<button class="action-btn btn-msg" onclick="quickMsg('${u.telegram_chat_id}')">Mesaj</button>` : ''}
+      </td>
+    </tr>`).join('') : '<tr><td colspan="7" class="empty">Kullanıcı bulunamadı</td></tr>';
+}
+
+async function updateStatus(id, status) {
+  try {
+    await sb.from('rg_users').update({ status }).eq('id', id);
+    showToast(`Durum "${status}" olarak güncellendi`);
+    loadUsers();
+  } catch(e) { showToast('Güncelleme hatası', true); }
+}
+
+function quickMsg(chatId) {
+  showPage('message');
+  document.getElementById('msgTarget').value = 'single';
+  document.getElementById('singleTarget').style.display = 'block';
+  document.getElementById('msgChatId').value = chatId;
+}
+
+async function loadEntries() {
+  try {
+    const { data } = await sb.from('rg_entries').select('*').order('created_at', { ascending: false }).limit(100);
+    document.getElementById('entryCount').textContent = `${data?.length || 0} kayıt (son 100)`;
+    const tbody = document.getElementById('entriesTable');
+    tbody.innerHTML = (data||[]).length ? data.map(e => `
+      <tr class="entry-row">
+        <td>${fmt(e.pub_date || e.created_at)}</td>
+        <td><div class="entry-title"><a href="${e.link||'#'}" target="_blank" style="color:#1a8a5c;text-decoration:none;">${e.title}</a></div></td>
+        <td><div class="entry-cat">${e.category||'—'}</div></td>
+      </tr>`).join('') : '<tr><td colspan="3" class="empty">Henüz kayıt yok — RSS kontrol bekleniyor</td></tr>';
+  } catch(e) { showToast('Kayıtlar yüklenemedi', true); }
+}
+
+document.getElementById('msgTarget').addEventListener('change', function() {
+  document.getElementById('singleTarget').style.display = this.value === 'single' ? 'block' : 'none';
+});
+
+async function sendMessage() {
+  const target = document.getElementById('msgTarget').value;
+  const text = document.getElementById('msgText').value.trim();
+  if (!text) { showToast('Mesaj boş olamaz', true); return; }
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> Gönderiliyor...';
+  try {
+    let chatIds = [];
+    if (target === 'single') {
+      const id = document.getElementById('msgChatId').value.trim();
+      if (!id) { showToast('Chat ID girin', true); btn.disabled=false; btn.textContent='Gönder →'; return; }
+      chatIds = [id];
+    } else {
+      const { data } = await sb.from('rg_users').select('telegram_chat_id').eq('status', 'active');
+      chatIds = (data||[]).map(u => u.telegram_chat_id).filter(Boolean);
+    }
+    let sent = 0;
+    for (const chatId of chatIds) {
+      await fetch(`https://api.telegram.org/bot${RG_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+      });
+      sent++;
+      await new Promise(r => setTimeout(r, 100));
+    }
+    showToast(`✓ ${sent} kullanıcıya gönderildi`);
+    document.getElementById('msgText').value = '';
+  } catch(e) { showToast('Gönderme hatası', true); }
+  btn.disabled = false;
+  btn.textContent = 'Gönder →';
+}
+</script>
+</body>
+</html>
