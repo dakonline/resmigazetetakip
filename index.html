@@ -228,31 +228,63 @@ h1 em {
   max-width: 480px;
   line-height: 1.2;
 }
-.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .step-card {
   background: white;
   padding: 40px 36px;
   position: relative;
   border: 1px solid var(--border);
-  transition: all 0.2s;
+  border-radius: 12px;
+  transition: all 0.25s;
+  overflow: hidden;
+}
+.step-card::after {
+  content: attr(data-num);
+  position: absolute;
+  bottom: -20px;
+  right: -10px;
+  font-family: 'Playfair Display', serif;
+  font-size: 120px;
+  font-weight: 700;
+  color: rgba(13,27,42,0.04);
+  line-height: 1;
+  pointer-events: none;
+}
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(to right, var(--gold), var(--gold-light));
+  opacity: 0;
+  transition: opacity 0.25s;
 }
 .step-card:hover {
-  box-shadow: 0 8px 32px rgba(26,92,138,0.1);
-  border-color: rgba(26,92,138,0.2);
+  box-shadow: 0 12px 40px rgba(13,27,42,0.1);
+  border-color: rgba(201,168,76,0.3);
+  transform: translateY(-4px);
 }
-.step-card:first-child { border-radius: 8px 0 0 8px; }
-.step-card:last-child { border-radius: 0 8px 8px 0; }
+.step-card:hover::before { opacity: 1; }
 .step-num {
   font-family: 'Playfair Display', serif;
-  font-size: 48px;
-  color: var(--light);
-  line-height: 1;
-  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--gold);
   font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.step-title { font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
-.step-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
-.step-icon { font-size: 28px; margin-bottom: 16px; }
+.step-num::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.step-title { font-size: 17px; font-weight: 600; color: var(--navy); margin-bottom: 12px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.75; }
+.step-icon { font-size: 36px; margin-bottom: 20px; display: block; }
 
 /* FEATURES */
 .features-section { padding: 100px 60px; background: white; }
@@ -723,23 +755,23 @@ setTimeout(type, 1000);
     <div class="section-eyebrow">Nasıl Çalışır</div>
     <div class="section-heading">Üç adımda kurulum tamamdır</div>
     <div class="steps-grid">
-      <div class="step-card">
+      <div class="step-card" data-num="01">
         <div class="step-num">01</div>
         <div class="step-icon">📋</div>
         <div class="step-title">Kelimelerinizi Girin</div>
-        <div class="step-desc">Takip etmek istediğiniz anahtar kelimeleri belirleyin. SGK, KDV, gümrük, sektörünüzün adı — ne olursa olsun.</div>
+        <div class="step-desc">Takip etmek istediğiniz anahtar kelimeleri belirleyin. SGK, KDV, gümrük, sektörünüzün adı — ne olursa olsun. Hazır paketlerden de seçebilirsiniz.</div>
       </div>
-      <div class="step-card">
+      <div class="step-card" data-num="02">
         <div class="step-num">02</div>
         <div class="step-icon">📱</div>
         <div class="step-title">Telegram'ı Bağlayın</div>
-        <div class="step-desc">@ResmiGazeteTakip_bot'a /start yazın, e-postanızı doğrulayın. İki dakika içinde sistem aktif olur.</div>
+        <div class="step-desc">@ResmiGazeteTakip_bot'a /start yazın, e-postanızı doğrulayın. İki dakika içinde sistem devreye girer.</div>
       </div>
-      <div class="step-card">
+      <div class="step-card" data-num="03">
         <div class="step-num">03</div>
         <div class="step-icon">🔔</div>
         <div class="step-title">Anında Haberdar Olun</div>
-        <div class="step-desc">İlgili karar Resmi Gazete'de yayımlandığında Telegram'ınıza bildirim gelir. Linke tıklayın, tam metni okuyun.</div>
+        <div class="step-desc">İlgili karar yayımlandığında Telegram'ınıza bildirim gelir. Linke tıklayın, kararın tam metnini okuyun.</div>
       </div>
     </div>
   </div>
