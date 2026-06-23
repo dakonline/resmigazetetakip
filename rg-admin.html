@@ -72,7 +72,7 @@
   .msg-form h3 { font-size: 15px; font-weight: 600; margin-bottom: 20px; }
   .form-group { margin-bottom: 16px; }
   .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
-  .form-group select, .form-group textarea, .form-group input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; }
+  .form-group select, .form-group textarea, .form-group input[type=text] { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; }
   .form-group textarea { height: 120px; resize: vertical; }
   .send-btn { padding: 11px 28px; background: var(--ink); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
   .send-btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -199,9 +199,17 @@ function switchTab(id, el) {
 function showToast(msg, error=false) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show' + (error?' error':'');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 function fmt(d) { return d ? new Date(d).toLocaleDateString('tr-TR') : '—'; }
+
+async function sendTelegramMsg(chatId, text) {
+  await fetch(`https://api.telegram.org/bot${RG_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+  });
+}
 
 async function loadUsers() {
   try {
@@ -242,33 +250,29 @@ function renderUsers(users) {
       <td><span class="badge ${u.status||'pending'}">${u.status==='active'?'Aktif':u.status==='cancelled'?'İptal':'Bekliyor'}</span></td>
       <td>${fmt(u.created_at)}</td>
       <td>
-        ${u.status!=='active'?`<button class="action-btn activate" onclick="updateStatus('${u.id}','active')">Aktifleştir</button>`:''}
-        ${u.status==='active'?`<button class="action-btn deactivate" onclick="updateStatus('${u.id}','cancelled')">Durdur</button>`:''}
+        ${u.status!=='active'?`<button class="action-btn activate" onclick="updateStatus('${u.id}','active','${u.telegram_chat_id||''}','${(u.keywords||[]).join(',')}')">Aktifleştir</button>`:''}
+        ${u.status==='active'?`<button class="action-btn deactivate" onclick="updateStatus('${u.id}','cancelled','${u.telegram_chat_id||''}','')">Durdur</button>`:''}
         ${u.telegram_chat_id?`<button class="action-btn msg" onclick="quickMsg('${u.telegram_chat_id}')">Mesaj</button>`:''}
         <button class="action-btn del" onclick="deleteUser('${u.id}')">Sil</button>
       </td>
     </tr>`).join('');
 }
-async function updateStatus(id, status) {
+
+async function updateStatus(id, status, chatId, keywords) {
   try {
     await sb.from('rg_users').update({ status }).eq('id', id);
-    // Telegram bildirimi gönder
-    const { data } = await sb.from('rg_users').select('telegram_chat_id, keywords').eq('id', id).single();
-    if (data?.telegram_chat_id) {
-      const kw = (data.keywords || []).join(', ');
+    if (chatId) {
+      const kw = keywords || '';
       const msg = status === 'active'
         ? `✅ <b>Aboneliğiniz Başladı!</b>\n\nResmi Gazete takibiniz aktif edildi.\n🔑 Takip edilen kelimeler: <b>${kw}</b>\n\nİlgili karar yayımlandığında anında bildirim alacaksınız.\n\n📋 resmigazetetakip.com`
-        : `😔 <b>Aboneliğiniz İptal Edildi.</b>\n\nSizi aramızda görmekten mutluluk duyduk. Tekrar üye olmak isterseniz:\n👉 resmigazetetakip.com`;
-      await fetch(\`https://api.telegram.org/bot${RG_TOKEN}/sendMessage\`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: data.telegram_chat_id, text: msg, parse_mode: 'HTML' })
-      });
+        : `😔 <b>Aboneliğiniz İptal Edildi.</b>\n\nSizi aramızda görmekten mutluluk duyduk.\nTekrar üye olmak isterseniz:\n👉 resmigazetetakip.com`;
+      await sendTelegramMsg(chatId, msg);
     }
     showToast(status==='active'?'✓ Aktifleştirildi, bildirim gönderildi':'✓ Durduruldu, bildirim gönderildi');
     loadUsers();
   } catch(e) { showToast('Güncelleme hatası', true); }
 }
+
 async function deleteUser(id) {
   if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
   try {
@@ -277,12 +281,14 @@ async function deleteUser(id) {
     loadUsers();
   } catch(e) { showToast('Silme hatası', true); }
 }
+
 function quickMsg(chatId) {
   switchTab('message', document.querySelectorAll('.tab')[2]);
   document.getElementById('msgTarget').value = 'single';
   document.getElementById('singleTarget').style.display = 'block';
   document.getElementById('msgChatId').value = chatId;
 }
+
 async function loadEntries() {
   try {
     const { data } = await sb.from('rg_entries').select('*').order('created_at', { ascending: false }).limit(100);
@@ -296,10 +302,12 @@ async function loadEntries() {
       </tr>`).join('');
   } catch(e) { showToast('Kayıtlar yüklenemedi', true); }
 }
+
 function toggleSingle() {
   document.getElementById('singleTarget').style.display =
     document.getElementById('msgTarget').value==='single'?'block':'none';
 }
+
 async function sendMessage() {
   const target = document.getElementById('msgTarget').value;
   const text = document.getElementById('msgText').value.trim();
@@ -319,10 +327,7 @@ async function sendMessage() {
     }
     let sent=0;
     for (const chatId of chatIds) {
-      await fetch(`https://api.telegram.org/bot${RG_TOKEN}/sendMessage`,{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({chat_id:chatId,text,parse_mode:'HTML'})
-      });
+      await sendTelegramMsg(chatId, text);
       sent++;
       await new Promise(r=>setTimeout(r,100));
     }
