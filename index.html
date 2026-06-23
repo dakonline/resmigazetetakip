@@ -165,18 +165,38 @@ h1 em {
 .btn-gold {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: var(--gold);
+  gap: 12px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  background-size: 200% auto;
   color: var(--navy);
-  padding: 14px 32px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 18px 40px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
   border: none;
-  transition: all 0.15s;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.4), 0 1px 0 rgba(255,255,255,0.2) inset;
+  position: relative;
+  overflow: hidden;
 }
-.btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -60%;
+  width: 40%; height: 200%;
+  background: rgba(255,255,255,0.25);
+  transform: skewX(-20deg);
+  transition: left 0.5s;
+}
+.btn-gold:hover::before { left: 130%; }
+.btn-gold:hover {
+  background-position: right center;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.5);
+}
+.btn-gold:active { transform: translateY(0); }
 .btn-outline {
   display: inline-flex;
   align-items: center;
@@ -695,7 +715,7 @@ footer p { font-size: 12px; color: rgba(255,255,255,0.25); }
     <a onclick="document.querySelector('.how-section').scrollIntoView({behavior:'smooth'})">Nasıl Çalışır</a>
     <a onclick="document.querySelector('.pricing-section').scrollIntoView({behavior:'smooth'})">Fiyat</a>
     <a onclick="document.querySelector('.faq-section').scrollIntoView({behavior:'smooth'})">SSS</a>
-    <a class="nav-cta" onclick="openModal()">Alarmı Kur →</a>
+    <a class="nav-cta" onclick="openModal()">🔔 Alarmı Kur →</a>
   </div>
 </nav>
 
@@ -725,7 +745,10 @@ setTimeout(type, 1000);
       İlgili karar yayımlandığı anda Telegram'ınıza bildirim gelir.
     </p>
     <div class="hero-btns">
-      <button class="btn-gold" onclick="openModal()">Alarmı Kur — ₺149/ay →</button>
+      <button class="btn-gold" onclick="openModal()">
+  🔔 Şimdi Alarmımı Kur
+  <span style="font-size:13px;opacity:0.8;font-weight:500;">— ₺149/ay</span>
+</button>
       <button class="btn-outline" onclick="document.querySelector('.how-section').scrollIntoView({behavior:'smooth'})">Nasıl çalışır?</button>
     </div>
     <div class="hero-stats">
