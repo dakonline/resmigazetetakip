@@ -252,7 +252,20 @@ function renderUsers(users) {
 async function updateStatus(id, status) {
   try {
     await sb.from('rg_users').update({ status }).eq('id', id);
-    showToast(status==='active'?'✓ Aktifleştirildi':'✓ Durduruldu');
+    // Telegram bildirimi gönder
+    const { data } = await sb.from('rg_users').select('telegram_chat_id, keywords').eq('id', id).single();
+    if (data?.telegram_chat_id) {
+      const kw = (data.keywords || []).join(', ');
+      const msg = status === 'active'
+        ? `✅ <b>Aboneliğiniz Başladı!</b>\n\nResmi Gazete takibiniz aktif edildi.\n🔑 Takip edilen kelimeler: <b>${kw}</b>\n\nİlgili karar yayımlandığında anında bildirim alacaksınız.\n\n📋 resmigazetetakip.com`
+        : `😔 <b>Aboneliğiniz İptal Edildi.</b>\n\nSizi aramızda görmekten mutluluk duyduk. Tekrar üye olmak isterseniz:\n👉 resmigazetetakip.com`;
+      await fetch(\`https://api.telegram.org/bot${RG_TOKEN}/sendMessage\`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: data.telegram_chat_id, text: msg, parse_mode: 'HTML' })
+      });
+    }
+    showToast(status==='active'?'✓ Aktifleştirildi, bildirim gönderildi':'✓ Durduruldu, bildirim gönderildi');
     loadUsers();
   } catch(e) { showToast('Güncelleme hatası', true); }
 }
