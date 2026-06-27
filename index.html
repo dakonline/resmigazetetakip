@@ -1059,6 +1059,14 @@ setTimeout(type, 1000);
       <div style="background:var(--off);border-radius:6px;padding:16px;margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.7;">
         Formu doldurun → Shopier üzerinden ödeme yapın → @ResmiGazeteTakip_bot'a /start yazın → Takip başlasın.
       </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding:14px;background:#f8f7f4;border-radius:6px;">
+        <input type="checkbox" id="kvkkOnay" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;cursor:pointer;">
+        <label for="kvkkOnay" style="font-size:12px;color:#6b6762;line-height:1.6;cursor:pointer;">
+          <a href="/kvkk.html" target="_blank" style="color:#1a5c8a;text-decoration:none;font-weight:500;">KVKK Aydınlatma Metni</a>'ni,
+          <a href="/gizlilik.html" target="_blank" style="color:#1a5c8a;text-decoration:none;font-weight:500;">Gizlilik Politikası</a>'nı ve
+          <a href="/iade-politikasi.html" target="_blank" style="color:#1a5c8a;text-decoration:none;font-weight:500;">İade Politikası</a>'nı okudum, kabul ediyorum.
+        </label>
+      </div>
       <button class="submit-btn" id="registerBtn" onclick="submitRegistration()">Devam Et & Ödeme Yap →</button>
       <button class="back-btn" onclick="showStep('step2')">← Geri</button>
     </div>
@@ -1142,6 +1150,10 @@ function goStep2() {
 function goStep3() { showStep('step3'); }
 
 async function submitRegistration() {
+  if (!document.getElementById('kvkkOnay').checked) {
+    alert('Devam etmek için KVKK ve Gizlilik Politikası''nı kabul etmeniz gerekiyor.');
+    return;
+  }
   const btn = document.getElementById('registerBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="loading-spin"></span>Kaydediliyor...';
